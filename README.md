@@ -22,12 +22,12 @@
 
 | Role | Name | Enrollment No. | GitHub Username |
 |------|------|----------------|-----------------|
-| Group Lead | | | |
-| Member 2 | | | |
-| Member 3 | | | |
-| Member 4 | | | |
+| Group Lead | Hirenya Sansanwal | 2501010671 | hirensansanwal |
+| Member 2 | Achintya Sharma | 2501010022 | Achintya-sh |
+| Member 3 | Shaurya Negi | 2501010423 | shauryanegi099 |
+| Member 4 | Joshmann Singh Dhiman | 2501010206 | JoshDebugs |
 
-**Team No.:** ____ · **Section:** ____ · **Repository URL:** ____
+**Team No.:** T0142 · **Section:** A · **Repository URL:** https://github.com/Achintya-sh/Campus_Delivery_Matrix_DE_2026
 
 ---
 
