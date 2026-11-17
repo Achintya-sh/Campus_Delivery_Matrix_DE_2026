@@ -31,6 +31,49 @@
 
 ---
 
+## How to Run & Headline Numbers
+
+### Quick Start (How to Run)
+```bash
+# 1. Unzip the seed dataset (11 CSV files, 781,194 total rows)
+unzip -q seed_data.zip
+
+# 2. Create the zomato schema, tables, and constraints (Phase 2)
+psql -v ON_ERROR_STOP=1 -d campus_delivery_matrix -f sql/01_schema.sql
+
+# 3. Load all 11 CSV files and run ANALYZE (Phase 2)
+psql -v ON_ERROR_STOP=1 -d campus_delivery_matrix -f sql/02_load_data.sql
+
+# 4. Run Phase 3 baseline benchmarks (3 runs per query, EXPLAIN ANALYZE BUFFERS)
+./benchmarks/run_benchmark.sh campus_delivery_matrix baseline
+```
+
+### Headline Numbers (Seed Dataset: 150,000 Orders)
+| Metric / Phase | Value | Details / Report Link |
+| :--- | :--- | :--- |
+| **Database & Hardware** | PostgreSQL 18.6 · Apple M4 (16 GB) | Schema `zomato` · 11 normalized relations (3NF/BCNF) |
+| **Total Seed Rows Loaded** | **781,194 rows** (`0` errors) | `150,000` orders · `375,000` order items · `137,378` payments · `50,000` menu items · `39,186` reviews ([docs/02_schema_design.md](docs/02_schema_design.md)) |
+| **Declarative Constraints** | **11 PKs · 15 FKs · 7 UNIQUE · 38 CHECKs** | Full order status/timestamp lifecycle & billing invariants ([sql/01_schema.sql](sql/01_schema.sql)) |
+| **Phase 3 Baseline Total (30 Queries)** | **9,044.222 ms** (average of 3 runs) | Read queries (`R01`–`R25`): `8,976.986 ms` · Write queries (`W01`–`W05`): `67.236 ms` ([docs/03_baseline_timings.md](docs/03_baseline_timings.md)) |
+| **Biggest Baseline Bottleneck** | **`R19`: 8,492.450 ms** (93.9% of total) | 3 correlated subqueries per Bengaluru restaurant (`750` unindexed table scans) |
+| **Correctness Bug Identified** | **`R13` (`NOT IN` with `NULL`s)** | Returns `0` rows instead of `82` active idle Bengaluru riders due to `NULL` `orders.partner_id` |
+
+### Evaluation Matrix · 100 Marks
+| Category | Evaluation Criteria | Marks |
+| :--- | :--- | ---: |
+| **AP Projects** | Normalization (`dbms/01_normalization.md`) | 5 |
+| | Entity Relationship Diagram (ERD) (`dbms/02_er_diagram.png`, `dbms/03_schema.sql`) | 5 |
+| | All SQL Queries Used (`dbms/04_queries.sql`) | 5 |
+| | Query Analysis (`dbms/05_query_timings.md`, `dbms/plans/`) | 5 |
+| | **AP Subtotal** | **20** |
+| **DE Projects** | **Query Execution** — Phase 1 Problem understanding (2) · Phase 2 Schema & data load (5) · Phase 3 Baseline timings, 3 runs + average (3) | 10 |
+| | **Code Optimization** — Phase 4 Indexes & query rewrites (16) · Phase 5 Scalability on the large dataset (14) | 30 |
+| | **Individual Analysis** (CP5 Viva) | 40 |
+| | **DE Subtotal** | **80** |
+| **Total** | | **100** |
+
+---
+
 ## How this project works
 
 | Phase | What you do | You submit | Counts toward | Marks |
