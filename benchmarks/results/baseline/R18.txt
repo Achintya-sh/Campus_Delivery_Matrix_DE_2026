@@ -1,0 +1,45 @@
+=== R18 run 1 ===
+Limit  (cost=1083.00..1083.12 rows=50 width=42) (actual time=26.218..26.223 rows=50.00 loops=1)
+  Buffers: shared hit=403
+  ->  Sort  (cost=1083.00..1090.16 rows=2866 width=42) (actual time=26.217..26.219 rows=50.00 loops=1)
+        Sort Key: created_at DESC
+        Sort Method: top-N heapsort  Memory: 34kB
+        Buffers: shared hit=403
+        ->  Seq Scan on reviews  (cost=0.00..987.79 rows=2866 width=42) (actual time=0.013..25.726 rows=2924.00 loops=1)
+              Filter: ((review_text ~~* '%cold%'::text) OR (review_text ~~* '%late%'::text))
+              Rows Removed by Filter: 36262
+              Buffers: shared hit=400
+Planning:
+  Buffers: shared hit=114
+Planning Time: 1.054 ms
+Execution Time: 26.249 ms
+=== R18 run 2 ===
+Limit  (cost=1083.00..1083.12 rows=50 width=42) (actual time=25.995..26.000 rows=50.00 loops=1)
+  Buffers: shared hit=403
+  ->  Sort  (cost=1083.00..1090.16 rows=2866 width=42) (actual time=25.994..25.995 rows=50.00 loops=1)
+        Sort Key: created_at DESC
+        Sort Method: top-N heapsort  Memory: 34kB
+        Buffers: shared hit=403
+        ->  Seq Scan on reviews  (cost=0.00..987.79 rows=2866 width=42) (actual time=0.012..25.516 rows=2924.00 loops=1)
+              Filter: ((review_text ~~* '%cold%'::text) OR (review_text ~~* '%late%'::text))
+              Rows Removed by Filter: 36262
+              Buffers: shared hit=400
+Planning:
+  Buffers: shared hit=114
+Planning Time: 0.481 ms
+Execution Time: 26.028 ms
+=== R18 run 3 ===
+Limit  (cost=1083.00..1083.12 rows=50 width=42) (actual time=26.077..26.083 rows=50.00 loops=1)
+  Buffers: shared hit=403
+  ->  Sort  (cost=1083.00..1090.16 rows=2866 width=42) (actual time=26.077..26.079 rows=50.00 loops=1)
+        Sort Key: created_at DESC
+        Sort Method: top-N heapsort  Memory: 34kB
+        Buffers: shared hit=403
+        ->  Seq Scan on reviews  (cost=0.00..987.79 rows=2866 width=42) (actual time=0.011..25.552 rows=2924.00 loops=1)
+              Filter: ((review_text ~~* '%cold%'::text) OR (review_text ~~* '%late%'::text))
+              Rows Removed by Filter: 36262
+              Buffers: shared hit=400
+Planning:
+  Buffers: shared hit=114
+Planning Time: 0.489 ms
+Execution Time: 26.111 ms

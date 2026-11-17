@@ -1,0 +1,51 @@
+=== R06 run 1 ===
+Sort  (cost=4960.23..4960.23 rows=1 width=32) (actual time=7.722..8.622 rows=1.00 loops=1)
+  Sort Key: placed_at
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=2419
+  ->  Gather  (cost=1000.00..4960.22 rows=1 width=32) (actual time=7.477..8.606 rows=1.00 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=2416
+        ->  Parallel Seq Scan on orders  (cost=0.00..3960.12 rows=1 width=32) (actual time=6.113..6.206 rows=0.50 loops=2)
+              Filter: ((restaurant_id = 217) AND (date(placed_at) = '2026-06-15'::date))
+              Rows Removed by Filter: 75000
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=103
+Planning Time: 0.299 ms
+Execution Time: 8.670 ms
+=== R06 run 2 ===
+Sort  (cost=4960.23..4960.23 rows=1 width=32) (actual time=7.675..8.591 rows=1.00 loops=1)
+  Sort Key: placed_at
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=2419
+  ->  Gather  (cost=1000.00..4960.22 rows=1 width=32) (actual time=7.628..8.575 rows=1.00 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=2416
+        ->  Parallel Seq Scan on orders  (cost=0.00..3960.12 rows=1 width=32) (actual time=6.144..6.238 rows=0.50 loops=2)
+              Filter: ((restaurant_id = 217) AND (date(placed_at) = '2026-06-15'::date))
+              Rows Removed by Filter: 75000
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=103
+Planning Time: 0.293 ms
+Execution Time: 8.634 ms
+=== R06 run 3 ===
+Sort  (cost=4960.23..4960.23 rows=1 width=32) (actual time=7.743..8.693 rows=1.00 loops=1)
+  Sort Key: placed_at
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=2419
+  ->  Gather  (cost=1000.00..4960.22 rows=1 width=32) (actual time=7.697..8.678 rows=1.00 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=2416
+        ->  Parallel Seq Scan on orders  (cost=0.00..3960.12 rows=1 width=32) (actual time=6.159..6.250 rows=0.50 loops=2)
+              Filter: ((restaurant_id = 217) AND (date(placed_at) = '2026-06-15'::date))
+              Rows Removed by Filter: 75000
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=103
+Planning Time: 0.272 ms
+Execution Time: 8.731 ms

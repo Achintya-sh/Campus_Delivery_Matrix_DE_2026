@@ -1,0 +1,45 @@
+=== R12 run 1 ===
+Limit  (cost=4291.06..4291.07 rows=5 width=31) (actual time=16.343..16.349 rows=50.00 loops=1)
+  Buffers: shared hit=2419
+  ->  Sort  (cost=4291.06..4291.07 rows=5 width=31) (actual time=16.343..16.345 rows=50.00 loops=1)
+        Sort Key: placed_at
+        Sort Method: quicksort  Memory: 30kB
+        Buffers: shared hit=2419
+        ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=5 width=31) (actual time=16.294..16.319 rows=75.00 loops=1)
+              Filter: ((partner_id IS NULL) AND ((status)::text = ANY ('{PLACED,ACCEPTED}'::text[])))
+              Rows Removed by Filter: 149925
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=148
+Planning Time: 0.369 ms
+Execution Time: 16.371 ms
+=== R12 run 2 ===
+Limit  (cost=4291.06..4291.07 rows=5 width=31) (actual time=17.237..17.245 rows=50.00 loops=1)
+  Buffers: shared hit=2419
+  ->  Sort  (cost=4291.06..4291.07 rows=5 width=31) (actual time=17.236..17.238 rows=50.00 loops=1)
+        Sort Key: placed_at
+        Sort Method: quicksort  Memory: 30kB
+        Buffers: shared hit=2419
+        ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=5 width=31) (actual time=17.188..17.216 rows=75.00 loops=1)
+              Filter: ((partner_id IS NULL) AND ((status)::text = ANY ('{PLACED,ACCEPTED}'::text[])))
+              Rows Removed by Filter: 149925
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=148
+Planning Time: 0.370 ms
+Execution Time: 17.266 ms
+=== R12 run 3 ===
+Limit  (cost=4291.06..4291.07 rows=5 width=31) (actual time=17.434..17.440 rows=50.00 loops=1)
+  Buffers: shared hit=2419
+  ->  Sort  (cost=4291.06..4291.07 rows=5 width=31) (actual time=17.433..17.437 rows=50.00 loops=1)
+        Sort Key: placed_at
+        Sort Method: quicksort  Memory: 30kB
+        Buffers: shared hit=2419
+        ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=5 width=31) (actual time=17.381..17.410 rows=75.00 loops=1)
+              Filter: ((partner_id IS NULL) AND ((status)::text = ANY ('{PLACED,ACCEPTED}'::text[])))
+              Rows Removed by Filter: 149925
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=148
+Planning Time: 0.431 ms
+Execution Time: 17.466 ms

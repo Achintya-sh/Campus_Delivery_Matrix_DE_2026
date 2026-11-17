@@ -1,0 +1,45 @@
+=== R11 run 1 ===
+Aggregate  (cost=5180.81..5180.82 rows=1 width=40) (actual time=9.511..10.491 rows=1.00 loops=1)
+  Buffers: shared hit=2416
+  ->  Gather  (cost=1000.00..5180.81 rows=1 width=4) (actual time=9.405..10.477 rows=2.00 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=2416
+        ->  Parallel Seq Scan on orders  (cost=0.00..4180.71 rows=1 width=4) (actual time=7.902..7.932 rows=1.00 loops=2)
+              Filter: ((placed_at >= '2026-06-22 00:00:00+05:30'::timestamp with time zone) AND (placed_at < '2026-06-29 00:00:00+05:30'::timestamp with time zone) AND (partner_id = 150) AND ((status)::text = 'DELIVERED'::text))
+              Rows Removed by Filter: 74999
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=106
+Planning Time: 0.303 ms
+Execution Time: 10.537 ms
+=== R11 run 2 ===
+Aggregate  (cost=5180.81..5180.82 rows=1 width=40) (actual time=9.493..10.431 rows=1.00 loops=1)
+  Buffers: shared hit=2416
+  ->  Gather  (cost=1000.00..5180.81 rows=1 width=4) (actual time=9.382..10.415 rows=2.00 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=2416
+        ->  Parallel Seq Scan on orders  (cost=0.00..4180.71 rows=1 width=4) (actual time=8.048..8.101 rows=1.00 loops=2)
+              Filter: ((placed_at >= '2026-06-22 00:00:00+05:30'::timestamp with time zone) AND (placed_at < '2026-06-29 00:00:00+05:30'::timestamp with time zone) AND (partner_id = 150) AND ((status)::text = 'DELIVERED'::text))
+              Rows Removed by Filter: 74999
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=106
+Planning Time: 0.321 ms
+Execution Time: 10.481 ms
+=== R11 run 3 ===
+Aggregate  (cost=5180.81..5180.82 rows=1 width=40) (actual time=9.636..10.593 rows=1.00 loops=1)
+  Buffers: shared hit=2416
+  ->  Gather  (cost=1000.00..5180.81 rows=1 width=4) (actual time=9.552..10.577 rows=2.00 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=2416
+        ->  Parallel Seq Scan on orders  (cost=0.00..4180.71 rows=1 width=4) (actual time=8.129..8.181 rows=1.00 loops=2)
+              Filter: ((placed_at >= '2026-06-22 00:00:00+05:30'::timestamp with time zone) AND (placed_at < '2026-06-29 00:00:00+05:30'::timestamp with time zone) AND (partner_id = 150) AND ((status)::text = 'DELIVERED'::text))
+              Rows Removed by Filter: 74999
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=106
+Planning Time: 0.291 ms
+Execution Time: 10.639 ms

@@ -1,0 +1,126 @@
+=== R19 run 1 ===
+Sort  (cost=2461888.30..2461888.92 rows=250 width=67) (actual time=8539.360..8539.405 rows=400.00 loops=1)
+  Sort Key: ((SubPlan 1)) DESC NULLS LAST
+  Sort Method: quicksort  Memory: 49kB
+  Buffers: shared hit=2092850
+  ->  Hash Join  (cost=2.38..2461878.34 rows=250 width=67) (actual time=25.081..8538.993 rows=400.00 loops=1)
+        Hash Cond: (r.locality_id = l.locality_id)
+        Buffers: shared hit=2092847
+        ->  Seq Scan on restaurants r  (cost=0.00..71.00 rows=2500 width=21) (actual time=0.004..0.378 rows=2500.00 loops=1)
+              Buffers: shared hit=46
+        ->  Hash  (cost=2.25..2.25 rows=10 width=2) (actual time=0.014..0.015 rows=10.00 loops=1)
+              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+              Buffers: shared hit=1
+              ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.007..0.011 rows=10.00 loops=1)
+                    Filter: (city_id = 1)
+                    Rows Removed by Filter: 90
+                    Buffers: shared hit=1
+        SubPlan 1
+          ->  Aggregate  (cost=4291.16..4291.17 rows=1 width=8) (actual time=6.900..6.900 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=63 width=8) (actual time=0.375..6.891 rows=60.27 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 149940
+                      Buffers: shared hit=966400
+        SubPlan 2
+          ->  Aggregate  (cost=4666.14..4666.15 rows=1 width=8) (actual time=12.330..12.330 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o_1  (cost=0.00..4666.00 rows=54 width=0) (actual time=0.702..12.323 rows=52.38 loops=400)
+                      Filter: ((restaurant_id = r.restaurant_id) AND ((status)::text = 'DELIVERED'::text))
+                      Rows Removed by Filter: 149948
+                      Buffers: shared hit=966400
+        SubPlan 3
+          ->  Aggregate  (cost=889.87..889.88 rows=1 width=32) (actual time=2.113..2.113 rows=1.00 loops=400)
+                Buffers: shared hit=160000
+                ->  Seq Scan on reviews v  (cost=0.00..889.83 rows=16 width=2) (actual time=0.201..2.107 rows=15.77 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 39170
+                      Buffers: shared hit=160000
+Planning:
+  Buffers: shared hit=350
+Planning Time: 0.992 ms
+Execution Time: 8539.527 ms
+=== R19 run 2 ===
+Sort  (cost=2461888.30..2461888.92 rows=250 width=67) (actual time=8403.494..8403.522 rows=400.00 loops=1)
+  Sort Key: ((SubPlan 1)) DESC NULLS LAST
+  Sort Method: quicksort  Memory: 49kB
+  Buffers: shared hit=2092850
+  ->  Hash Join  (cost=2.38..2461878.34 rows=250 width=67) (actual time=27.070..8403.213 rows=400.00 loops=1)
+        Hash Cond: (r.locality_id = l.locality_id)
+        Buffers: shared hit=2092847
+        ->  Seq Scan on restaurants r  (cost=0.00..71.00 rows=2500 width=21) (actual time=0.005..0.386 rows=2500.00 loops=1)
+              Buffers: shared hit=46
+        ->  Hash  (cost=2.25..2.25 rows=10 width=2) (actual time=0.016..0.016 rows=10.00 loops=1)
+              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+              Buffers: shared hit=1
+              ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.007..0.011 rows=10.00 loops=1)
+                    Filter: (city_id = 1)
+                    Rows Removed by Filter: 90
+                    Buffers: shared hit=1
+        SubPlan 1
+          ->  Aggregate  (cost=4291.16..4291.17 rows=1 width=8) (actual time=6.881..6.882 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=63 width=8) (actual time=0.376..6.873 rows=60.27 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 149940
+                      Buffers: shared hit=966400
+        SubPlan 2
+          ->  Aggregate  (cost=4666.14..4666.15 rows=1 width=8) (actual time=12.001..12.001 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o_1  (cost=0.00..4666.00 rows=54 width=0) (actual time=0.683..11.994 rows=52.38 loops=400)
+                      Filter: ((restaurant_id = r.restaurant_id) AND ((status)::text = 'DELIVERED'::text))
+                      Rows Removed by Filter: 149948
+                      Buffers: shared hit=966400
+        SubPlan 3
+          ->  Aggregate  (cost=889.87..889.88 rows=1 width=32) (actual time=2.120..2.120 rows=1.00 loops=400)
+                Buffers: shared hit=160000
+                ->  Seq Scan on reviews v  (cost=0.00..889.83 rows=16 width=2) (actual time=0.202..2.114 rows=15.77 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 39170
+                      Buffers: shared hit=160000
+Planning:
+  Buffers: shared hit=350
+Planning Time: 1.080 ms
+Execution Time: 8403.653 ms
+=== R19 run 3 ===
+Sort  (cost=2461888.30..2461888.92 rows=250 width=67) (actual time=8533.991..8534.041 rows=400.00 loops=1)
+  Sort Key: ((SubPlan 1)) DESC NULLS LAST
+  Sort Method: quicksort  Memory: 49kB
+  Buffers: shared hit=2092850
+  ->  Hash Join  (cost=2.38..2461878.34 rows=250 width=67) (actual time=27.490..8533.687 rows=400.00 loops=1)
+        Hash Cond: (r.locality_id = l.locality_id)
+        Buffers: shared hit=2092847
+        ->  Seq Scan on restaurants r  (cost=0.00..71.00 rows=2500 width=21) (actual time=0.005..0.390 rows=2500.00 loops=1)
+              Buffers: shared hit=46
+        ->  Hash  (cost=2.25..2.25 rows=10 width=2) (actual time=0.018..0.019 rows=10.00 loops=1)
+              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+              Buffers: shared hit=1
+              ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.008..0.012 rows=10.00 loops=1)
+                    Filter: (city_id = 1)
+                    Rows Removed by Filter: 90
+                    Buffers: shared hit=1
+        SubPlan 1
+          ->  Aggregate  (cost=4291.16..4291.17 rows=1 width=8) (actual time=6.906..6.906 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=63 width=8) (actual time=0.376..6.897 rows=60.27 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 149940
+                      Buffers: shared hit=966400
+        SubPlan 2
+          ->  Aggregate  (cost=4666.14..4666.15 rows=1 width=8) (actual time=12.293..12.293 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o_1  (cost=0.00..4666.00 rows=54 width=0) (actual time=0.698..12.285 rows=52.38 loops=400)
+                      Filter: ((restaurant_id = r.restaurant_id) AND ((status)::text = 'DELIVERED'::text))
+                      Rows Removed by Filter: 149948
+                      Buffers: shared hit=966400
+        SubPlan 3
+          ->  Aggregate  (cost=889.87..889.88 rows=1 width=32) (actual time=2.130..2.131 rows=1.00 loops=400)
+                Buffers: shared hit=160000
+                ->  Seq Scan on reviews v  (cost=0.00..889.83 rows=16 width=2) (actual time=0.203..2.124 rows=15.77 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 39170
+                      Buffers: shared hit=160000
+Planning:
+  Buffers: shared hit=350
+Planning Time: 1.109 ms
+Execution Time: 8534.169 ms

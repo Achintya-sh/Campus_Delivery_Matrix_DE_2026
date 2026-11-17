@@ -1,0 +1,39 @@
+=== R23 run 1 ===
+Limit  (cost=21163.95..21164.01 rows=25 width=40) (actual time=65.450..65.459 rows=25.00 loops=1)
+  Buffers: shared hit=2419, temp read=823 written=961
+  ->  Sort  (cost=20913.95..21288.95 rows=150000 width=40) (actual time=55.436..62.171 rows=100025.00 loops=1)
+        Sort Key: placed_at DESC
+        Sort Method: external merge  Disk: 7664kB
+        Buffers: shared hit=2419, temp read=823 written=961
+        ->  Seq Scan on orders  (cost=0.00..3916.00 rows=150000 width=40) (actual time=0.012..19.252 rows=150000.00 loops=1)
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=92
+Planning Time: 0.301 ms
+Execution Time: 69.351 ms
+=== R23 run 2 ===
+Limit  (cost=21163.95..21164.01 rows=25 width=40) (actual time=71.120..71.128 rows=25.00 loops=1)
+  Buffers: shared hit=2419, temp read=823 written=961
+  ->  Sort  (cost=20913.95..21288.95 rows=150000 width=40) (actual time=60.438..67.802 rows=100025.00 loops=1)
+        Sort Key: placed_at DESC
+        Sort Method: external merge  Disk: 7664kB
+        Buffers: shared hit=2419, temp read=823 written=961
+        ->  Seq Scan on orders  (cost=0.00..3916.00 rows=150000 width=40) (actual time=0.012..21.257 rows=150000.00 loops=1)
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=92
+Planning Time: 0.313 ms
+Execution Time: 76.630 ms
+=== R23 run 3 ===
+Limit  (cost=21163.95..21164.01 rows=25 width=40) (actual time=69.138..69.143 rows=25.00 loops=1)
+  Buffers: shared hit=2419, temp read=823 written=961
+  ->  Sort  (cost=20913.95..21288.95 rows=150000 width=40) (actual time=58.942..65.789 rows=100025.00 loops=1)
+        Sort Key: placed_at DESC
+        Sort Method: external merge  Disk: 7664kB
+        Buffers: shared hit=2419, temp read=823 written=961
+        ->  Seq Scan on orders  (cost=0.00..3916.00 rows=150000 width=40) (actual time=0.014..23.014 rows=150000.00 loops=1)
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=92
+Planning Time: 0.366 ms
+Execution Time: 77.543 ms

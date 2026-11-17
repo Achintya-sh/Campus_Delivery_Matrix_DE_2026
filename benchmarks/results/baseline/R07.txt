@@ -1,0 +1,108 @@
+=== R07 run 1 ===
+Sort  (cost=5207.55..5207.57 rows=8 width=53) (actual time=9.853..10.830 rows=3.00 loops=1)
+  Sort Key: (sum(oi.quantity)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=2435
+  ->  GroupAggregate  (cost=5207.21..5207.43 rows=8 width=53) (actual time=9.842..10.820 rows=3.00 loops=1)
+        Group Key: m.item_name
+        Buffers: shared hit=2432
+        ->  Sort  (cost=5207.21..5207.23 rows=8 width=20) (actual time=9.824..10.800 rows=3.00 loops=1)
+              Sort Key: m.item_name
+              Sort Method: quicksort  Memory: 25kB
+              Buffers: shared hit=2432
+              ->  Gather  (cost=1000.71..5207.09 rows=8 width=20) (actual time=8.815..10.774 rows=3.00 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=2429
+                    ->  Nested Loop  (cost=0.71..4206.29 rows=5 width=20) (actual time=7.646..8.117 rows=1.50 loops=2)
+                          Buffers: shared hit=2429
+                          ->  Nested Loop  (cost=0.42..4204.72 rows=5 width=11) (actual time=7.639..8.108 rows=1.50 loops=2)
+                                Buffers: shared hit=2420
+                                ->  Parallel Seq Scan on orders o  (cost=0.00..4180.71 rows=2 width=8) (actual time=7.629..8.098 rows=0.50 loops=2)
+                                      Filter: ((placed_at >= '2026-05-01 00:00:00+05:30'::timestamp with time zone) AND (placed_at < '2026-06-01 00:00:00+05:30'::timestamp with time zone) AND (restaurant_id = 217) AND ((status)::text = 'DELIVERED'::text))
+                                      Rows Removed by Filter: 75000
+                                      Buffers: shared hit=2416
+                                ->  Index Scan using order_items_pkey on order_items oi  (cost=0.42..11.97 rows=3 width=19) (actual time=0.016..0.017 rows=3.00 loops=1)
+                                      Index Cond: (order_id = o.order_id)
+                                      Index Searches: 1
+                                      Buffers: shared hit=4
+                          ->  Index Scan using menu_items_pkey on menu_items m  (cost=0.29..0.31 rows=1 width=17) (actual time=0.005..0.005 rows=1.00 loops=3)
+                                Index Cond: (item_id = oi.item_id)
+                                Index Searches: 3
+                                Buffers: shared hit=9
+Planning:
+  Buffers: shared hit=325 dirtied=1
+Planning Time: 1.134 ms
+Execution Time: 11.161 ms
+=== R07 run 2 ===
+Sort  (cost=5207.55..5207.57 rows=8 width=53) (actual time=9.868..10.815 rows=3.00 loops=1)
+  Sort Key: (sum(oi.quantity)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=2435
+  ->  GroupAggregate  (cost=5207.21..5207.43 rows=8 width=53) (actual time=9.858..10.807 rows=3.00 loops=1)
+        Group Key: m.item_name
+        Buffers: shared hit=2432
+        ->  Sort  (cost=5207.21..5207.23 rows=8 width=20) (actual time=9.840..10.787 rows=3.00 loops=1)
+              Sort Key: m.item_name
+              Sort Method: quicksort  Memory: 25kB
+              Buffers: shared hit=2432
+              ->  Gather  (cost=1000.71..5207.09 rows=8 width=20) (actual time=8.822..10.760 rows=3.00 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=2429
+                    ->  Nested Loop  (cost=0.71..4206.29 rows=5 width=20) (actual time=7.755..8.234 rows=1.50 loops=2)
+                          Buffers: shared hit=2429
+                          ->  Nested Loop  (cost=0.42..4204.72 rows=5 width=11) (actual time=7.749..8.226 rows=1.50 loops=2)
+                                Buffers: shared hit=2420
+                                ->  Parallel Seq Scan on orders o  (cost=0.00..4180.71 rows=2 width=8) (actual time=7.742..8.218 rows=0.50 loops=2)
+                                      Filter: ((placed_at >= '2026-05-01 00:00:00+05:30'::timestamp with time zone) AND (placed_at < '2026-06-01 00:00:00+05:30'::timestamp with time zone) AND (restaurant_id = 217) AND ((status)::text = 'DELIVERED'::text))
+                                      Rows Removed by Filter: 75000
+                                      Buffers: shared hit=2416
+                                ->  Index Scan using order_items_pkey on order_items oi  (cost=0.42..11.97 rows=3 width=19) (actual time=0.011..0.012 rows=3.00 loops=1)
+                                      Index Cond: (order_id = o.order_id)
+                                      Index Searches: 1
+                                      Buffers: shared hit=4
+                          ->  Index Scan using menu_items_pkey on menu_items m  (cost=0.29..0.31 rows=1 width=17) (actual time=0.005..0.005 rows=1.00 loops=3)
+                                Index Cond: (item_id = oi.item_id)
+                                Index Searches: 3
+                                Buffers: shared hit=9
+Planning:
+  Buffers: shared hit=324
+Planning Time: 0.974 ms
+Execution Time: 10.893 ms
+=== R07 run 3 ===
+Sort  (cost=5207.55..5207.57 rows=8 width=53) (actual time=9.823..10.770 rows=3.00 loops=1)
+  Sort Key: (sum(oi.quantity)) DESC
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=2437
+  ->  GroupAggregate  (cost=5207.21..5207.43 rows=8 width=53) (actual time=9.813..10.762 rows=3.00 loops=1)
+        Group Key: m.item_name
+        Buffers: shared hit=2434
+        ->  Sort  (cost=5207.21..5207.23 rows=8 width=20) (actual time=9.793..10.740 rows=3.00 loops=1)
+              Sort Key: m.item_name
+              Sort Method: quicksort  Memory: 25kB
+              Buffers: shared hit=2434
+              ->  Gather  (cost=1000.71..5207.09 rows=8 width=20) (actual time=9.754..10.704 rows=3.00 loops=1)
+                    Workers Planned: 1
+                    Workers Launched: 1
+                    Buffers: shared hit=2431
+                    ->  Nested Loop  (cost=0.71..4206.29 rows=5 width=20) (actual time=7.732..8.215 rows=1.50 loops=2)
+                          Buffers: shared hit=2431
+                          ->  Nested Loop  (cost=0.42..4204.72 rows=5 width=11) (actual time=7.723..8.204 rows=1.50 loops=2)
+                                Buffers: shared hit=2421
+                                ->  Parallel Seq Scan on orders o  (cost=0.00..4180.71 rows=2 width=8) (actual time=7.714..8.195 rows=0.50 loops=2)
+                                      Filter: ((placed_at >= '2026-05-01 00:00:00+05:30'::timestamp with time zone) AND (placed_at < '2026-06-01 00:00:00+05:30'::timestamp with time zone) AND (restaurant_id = 217) AND ((status)::text = 'DELIVERED'::text))
+                                      Rows Removed by Filter: 75000
+                                      Buffers: shared hit=2416
+                                ->  Index Scan using order_items_pkey on order_items oi  (cost=0.42..11.97 rows=3 width=19) (actual time=0.015..0.015 rows=3.00 loops=1)
+                                      Index Cond: (order_id = o.order_id)
+                                      Index Searches: 1
+                                      Buffers: shared hit=5
+                          ->  Index Scan using menu_items_pkey on menu_items m  (cost=0.29..0.31 rows=1 width=17) (actual time=0.007..0.007 rows=1.00 loops=3)
+                                Index Cond: (item_id = oi.item_id)
+                                Index Searches: 3
+                                Buffers: shared hit=10
+Planning:
+  Buffers: shared hit=324
+Planning Time: 1.015 ms
+Execution Time: 10.845 ms
