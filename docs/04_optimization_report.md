@@ -371,3 +371,37 @@ Execution Time: 0.237 ms
 
 ---
 
+## 7. Index Storage Footprint (`pg_relation_size` vs. Table Size)
+
+Measured via `pg_relation_size()` in PostgreSQL after `VACUUM ANALYZE`:
+
+| Table | Table Heap Size | Index Name | Index Type | Index Size | % of Table Size | Queries Served |
+| :--- | ---: | :--- | :--- | ---: | ---: | :--- |
+| `localities` | `8,192 B` (`8 kB`) | `idx_localities_name_inc` | Covering B-tree | `16 kB` | `200.0%` | `R01` |
+| `restaurants` | `368 kB` | `idx_restaurants_loc_status_rating` | Covering B-tree | `1,304 kB` | `354.3%` | `R01`, `R02`, `R08`, `R19`, `R22`, `R25` |
+| `restaurants` | `368 kB` | `idx_restaurants_cuisines_gin_open` | Partial GIN (`TEXT[]`) | `344 kB` | `93.5%` | `R25` |
+| `menu_items` | `3,456 kB` | `idx_menu_items_rest_avail_sort` | Partial Covering B-tree | `2,560 kB` | `74.1%` | `R03` |
+| `menu_items` | `3,456 kB` | `idx_menu_items_name_trgm_avail` | Partial GIN (`pg_trgm`) | `1,352 kB` | `39.1%` | `R02` |
+| `menu_items` | `3,456 kB` | `idx_menu_items_rest_category` | Composite B-tree | `848 kB` | `24.5%` | `R02`, `W03` |
+| `customers` | `2,912 kB` | `idx_customers_city_id_inc` | Covering B-tree | `1,152 kB` | `39.6%` | `R20` |
+| `customers` | `2,912 kB` | `idx_customers_id_city_inc` | Covering B-tree | `592 kB` | `20.3%` | `R21` |
+| `customers` | `2,912 kB` | `idx_customers_gold_expires_partial` | Partial Covering B-tree | `168 kB` | `5.8%` | `R14`, `W05` |
+| `delivery_partners` | `176 kB` | `idx_partners_city_active_inc` | Partial Covering B-tree | `104 kB` | `59.1%` | `R13` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_placed_desc_covering` | Covering B-tree | `10 MB` (`10,280 kB`) | `53.2%` | `R09`, `R10`, `R14`, `R21`, `R23` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_customer_placed_desc_inc` | Covering B-tree | `10,176 kB` | `52.6%` | `R04`, `R14` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_rest_placed_inc` | Covering B-tree | `8,960 kB` | `46.4%` | `R06`, `R19`, `R22` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_partner_placed_delivered_inc` | Partial Covering B-tree | `5,192 kB` | `26.9%` | `R11` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_rest_placed_delivered_inc` | Partial Covering B-tree | `5,192 kB` | `26.9%` | `R07`, `R08`, `R19` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_id_customer_inc` | Covering B-tree | `4,640 kB` | `24.0%` | `R17`, `R24`, `W02` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_placed_partner_notnull` | Partial B-tree | `4,216 kB` | `21.8%` | `R13` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_customer_delivered_spend` | Partial Covering B-tree | `4,040 kB` | `20.9%` | `R20` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_coupon_delivered_partial` | Partial Covering B-tree | `984 kB` | `5.1%` | `R15` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_unassigned_dispatch_partial` | Partial Covering B-tree | **`16 kB`** | **`0.1%`** | `R12`, `W02` |
+| `orders` | `19 MB` (`19,328 kB`) | `idx_orders_preparing_accepted_partial` | Partial Covering B-tree | **`16 kB`** | **`0.1%`** | `R05` |
+| `payments` | `10 MB` (`10,256 kB`) | `idx_payments_order_status_inc` | Covering B-tree | `5,456 kB` | `53.2%` | `R24` |
+| `payments` | `10 MB` (`10,256 kB`) | `idx_payments_failed_attempted_partial` | Partial Covering B-tree | **`296 kB`** | **`2.9%`** | `R16`, `R17` |
+| `reviews` | `3,040 kB` | `idx_reviews_restaurant_rating_inc` | Covering B-tree | `880 kB` | `28.9%` | `R19`, `W04` |
+| `reviews` | `3,040 kB` | `idx_reviews_text_trgm` | Partial GIN (`pg_trgm`) | `824 kB` | `27.1%` | `R18` |
+
+---
+
