@@ -1,0 +1,66 @@
+=== R25 run 1 ===
+Sort  (cost=48.37..48.52 rows=60 width=71) (actual time=0.180..0.183 rows=62.00 loops=1)
+  Sort Key: r.rating DESC NULLS LAST
+  Sort Method: quicksort  Memory: 30kB
+  Buffers: shared hit=28
+  ->  Nested Loop  (cost=0.28..46.60 rows=60 width=71) (actual time=0.068..0.137 rows=62.00 loops=1)
+        Buffers: shared hit=25
+        ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.006..0.009 rows=10.00 loops=1)
+              Filter: (city_id = 6)
+              Rows Removed by Filter: 90
+              Buffers: shared hit=1
+        ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.38 rows=6 width=73) (actual time=0.008..0.012 rows=6.20 loops=10)
+              Index Cond: ((locality_id = l.locality_id) AND (status = 'OPEN'::text))
+              Filter: ('Chinese'::text = ANY (cuisines))
+              Rows Removed by Filter: 12
+              Heap Fetches: 0
+              Index Searches: 10
+              Buffers: shared hit=24
+Planning:
+  Buffers: shared hit=390
+Planning Time: 0.983 ms
+Execution Time: 0.235 ms
+=== R25 run 2 ===
+Sort  (cost=48.37..48.52 rows=60 width=71) (actual time=0.172..0.175 rows=62.00 loops=1)
+  Sort Key: r.rating DESC NULLS LAST
+  Sort Method: quicksort  Memory: 30kB
+  Buffers: shared hit=28
+  ->  Nested Loop  (cost=0.28..46.60 rows=60 width=71) (actual time=0.061..0.124 rows=62.00 loops=1)
+        Buffers: shared hit=25
+        ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.006..0.009 rows=10.00 loops=1)
+              Filter: (city_id = 6)
+              Rows Removed by Filter: 90
+              Buffers: shared hit=1
+        ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.38 rows=6 width=73) (actual time=0.008..0.011 rows=6.20 loops=10)
+              Index Cond: ((locality_id = l.locality_id) AND (status = 'OPEN'::text))
+              Filter: ('Chinese'::text = ANY (cuisines))
+              Rows Removed by Filter: 12
+              Heap Fetches: 0
+              Index Searches: 10
+              Buffers: shared hit=24
+Planning:
+  Buffers: shared hit=390
+Planning Time: 0.876 ms
+Execution Time: 0.216 ms
+=== R25 run 3 ===
+Sort  (cost=48.37..48.52 rows=60 width=71) (actual time=0.163..0.166 rows=62.00 loops=1)
+  Sort Key: r.rating DESC NULLS LAST
+  Sort Method: quicksort  Memory: 30kB
+  Buffers: shared hit=28
+  ->  Nested Loop  (cost=0.28..46.60 rows=60 width=71) (actual time=0.059..0.123 rows=62.00 loops=1)
+        Buffers: shared hit=25
+        ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.006..0.009 rows=10.00 loops=1)
+              Filter: (city_id = 6)
+              Rows Removed by Filter: 90
+              Buffers: shared hit=1
+        ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.38 rows=6 width=73) (actual time=0.007..0.011 rows=6.20 loops=10)
+              Index Cond: ((locality_id = l.locality_id) AND (status = 'OPEN'::text))
+              Filter: ('Chinese'::text = ANY (cuisines))
+              Rows Removed by Filter: 12
+              Heap Fetches: 0
+              Index Searches: 10
+              Buffers: shared hit=24
+Planning:
+  Buffers: shared hit=390
+Planning Time: 0.895 ms
+Execution Time: 0.209 ms

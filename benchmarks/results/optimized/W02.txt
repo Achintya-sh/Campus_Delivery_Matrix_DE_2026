@@ -1,0 +1,63 @@
+=== W02 run 1 ===
+Update on orders  (cost=4.62..12.63 rows=0 width=0) (actual time=0.797..0.798 rows=0.00 loops=1)
+  Buffers: shared hit=78 read=2 dirtied=5
+  InitPlan 1
+    ->  Limit  (cost=0.14..4.20 rows=1 width=16) (actual time=0.055..0.056 rows=1.00 loops=1)
+          Buffers: shared hit=2
+          ->  Index Only Scan using idx_orders_unassigned_dispatch_partial on orders orders_1  (cost=0.14..8.25 rows=2 width=16) (actual time=0.054..0.054 rows=1.00 loops=1)
+                Filter: ((status)::text = 'ACCEPTED'::text)
+                Rows Removed by Filter: 1
+                Heap Fetches: 0
+                Index Searches: 1
+                Buffers: shared hit=2
+  ->  Index Scan using idx_orders_id_customer_inc on orders  (cost=0.42..8.44 rows=1 width=88) (actual time=0.071..0.072 rows=1.00 loops=1)
+        Index Cond: (order_id = (InitPlan 1).col1)
+        Index Searches: 1
+        Buffers: shared hit=6
+Planning:
+  Buffers: shared hit=403
+Planning Time: 1.118 ms
+Trigger for constraint orders_partner_id_fkey: time=0.346 calls=1
+Execution Time: 1.239 ms
+=== W02 run 2 ===
+Update on orders  (cost=4.62..12.63 rows=0 width=0) (actual time=0.402..0.402 rows=0.00 loops=1)
+  Buffers: shared hit=82
+  InitPlan 1
+    ->  Limit  (cost=0.14..4.20 rows=1 width=16) (actual time=0.055..0.055 rows=1.00 loops=1)
+          Buffers: shared hit=3
+          ->  Index Only Scan using idx_orders_unassigned_dispatch_partial on orders orders_1  (cost=0.14..8.25 rows=2 width=16) (actual time=0.054..0.054 rows=1.00 loops=1)
+                Filter: ((status)::text = 'ACCEPTED'::text)
+                Rows Removed by Filter: 1
+                Heap Fetches: 2
+                Index Searches: 1
+                Buffers: shared hit=3
+  ->  Index Scan using idx_orders_id_customer_inc on orders  (cost=0.42..8.44 rows=1 width=88) (actual time=0.067..0.068 rows=1.00 loops=1)
+        Index Cond: (order_id = (InitPlan 1).col1)
+        Index Searches: 1
+        Buffers: shared hit=9
+Planning:
+  Buffers: shared hit=403
+Planning Time: 1.078 ms
+Trigger for constraint orders_partner_id_fkey: time=0.326 calls=1
+Execution Time: 0.811 ms
+=== W02 run 3 ===
+Update on orders  (cost=4.62..12.63 rows=0 width=0) (actual time=0.478..0.478 rows=0.00 loops=1)
+  Buffers: shared hit=83
+  InitPlan 1
+    ->  Limit  (cost=0.14..4.20 rows=1 width=16) (actual time=0.065..0.065 rows=1.00 loops=1)
+          Buffers: shared hit=3
+          ->  Index Only Scan using idx_orders_unassigned_dispatch_partial on orders orders_1  (cost=0.14..8.25 rows=2 width=16) (actual time=0.064..0.064 rows=1.00 loops=1)
+                Filter: ((status)::text = 'ACCEPTED'::text)
+                Rows Removed by Filter: 1
+                Heap Fetches: 2
+                Index Searches: 1
+                Buffers: shared hit=3
+  ->  Index Scan using idx_orders_id_customer_inc on orders  (cost=0.42..8.44 rows=1 width=88) (actual time=0.081..0.084 rows=1.00 loops=1)
+        Index Cond: (order_id = (InitPlan 1).col1)
+        Index Searches: 1
+        Buffers: shared hit=10
+Planning:
+  Buffers: shared hit=403
+Planning Time: 1.165 ms
+Trigger for constraint orders_partner_id_fkey: time=0.382 calls=1
+Execution Time: 0.959 ms

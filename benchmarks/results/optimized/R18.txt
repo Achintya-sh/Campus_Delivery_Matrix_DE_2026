@@ -1,0 +1,90 @@
+=== R18 run 1 ===
+Limit  (cost=930.36..930.48 rows=50 width=42) (actual time=4.680..4.686 rows=50.00 loops=1)
+  Buffers: shared hit=760
+  ->  Sort  (cost=930.36..935.57 rows=2085 width=42) (actual time=4.679..4.681 rows=50.00 loops=1)
+        Sort Key: reviews.created_at DESC
+        Sort Method: top-N heapsort  Memory: 33kB
+        Buffers: shared hit=760
+        ->  Append  (cost=25.17..861.09 rows=2085 width=42) (actual time=0.172..4.295 rows=2924.00 loops=1)
+              Buffers: shared hit=757
+              ->  Bitmap Heap Scan on reviews  (cost=25.17..423.50 rows=1467 width=42) (actual time=0.171..1.733 rows=1460.00 loops=1)
+                    Recheck Cond: (review_text ~~* '%cold%'::text)
+                    Heap Blocks: exact=376
+                    Buffers: shared hit=381
+                    ->  Bitmap Index Scan on idx_reviews_text_trgm  (cost=0.00..24.80 rows=1467 width=0) (actual time=0.128..0.128 rows=1460.00 loops=1)
+                          Index Cond: (review_text ~~* '%cold%'::text)
+                          Index Searches: 1
+                          Buffers: shared hit=5
+              ->  Bitmap Heap Scan on reviews reviews_1  (cost=24.98..427.17 rows=618 width=42) (actual time=0.155..2.378 rows=1464.00 loops=1)
+                    Recheck Cond: (review_text ~~* '%late%'::text)
+                    Filter: (review_text !~~* '%cold%'::text)
+                    Heap Blocks: exact=371
+                    Buffers: shared hit=376
+                    ->  Bitmap Index Scan on idx_reviews_text_trgm  (cost=0.00..24.83 rows=1479 width=0) (actual time=0.119..0.119 rows=1464.00 loops=1)
+                          Index Cond: (review_text ~~* '%late%'::text)
+                          Index Searches: 1
+                          Buffers: shared hit=5
+Planning:
+  Buffers: shared hit=155
+Planning Time: 1.247 ms
+Execution Time: 4.758 ms
+=== R18 run 2 ===
+Limit  (cost=930.36..930.48 rows=50 width=42) (actual time=4.808..4.814 rows=50.00 loops=1)
+  Buffers: shared hit=760
+  ->  Sort  (cost=930.36..935.57 rows=2085 width=42) (actual time=4.807..4.810 rows=50.00 loops=1)
+        Sort Key: reviews.created_at DESC
+        Sort Method: top-N heapsort  Memory: 33kB
+        Buffers: shared hit=760
+        ->  Append  (cost=25.17..861.09 rows=2085 width=42) (actual time=0.161..4.427 rows=2924.00 loops=1)
+              Buffers: shared hit=757
+              ->  Bitmap Heap Scan on reviews  (cost=25.17..423.50 rows=1467 width=42) (actual time=0.161..1.769 rows=1460.00 loops=1)
+                    Recheck Cond: (review_text ~~* '%cold%'::text)
+                    Heap Blocks: exact=376
+                    Buffers: shared hit=381
+                    ->  Bitmap Index Scan on idx_reviews_text_trgm  (cost=0.00..24.80 rows=1467 width=0) (actual time=0.121..0.121 rows=1460.00 loops=1)
+                          Index Cond: (review_text ~~* '%cold%'::text)
+                          Index Searches: 1
+                          Buffers: shared hit=5
+              ->  Bitmap Heap Scan on reviews reviews_1  (cost=24.98..427.17 rows=618 width=42) (actual time=0.150..2.473 rows=1464.00 loops=1)
+                    Recheck Cond: (review_text ~~* '%late%'::text)
+                    Filter: (review_text !~~* '%cold%'::text)
+                    Heap Blocks: exact=371
+                    Buffers: shared hit=376
+                    ->  Bitmap Index Scan on idx_reviews_text_trgm  (cost=0.00..24.83 rows=1479 width=0) (actual time=0.117..0.117 rows=1464.00 loops=1)
+                          Index Cond: (review_text ~~* '%late%'::text)
+                          Index Searches: 1
+                          Buffers: shared hit=5
+Planning:
+  Buffers: shared hit=155
+Planning Time: 1.173 ms
+Execution Time: 4.882 ms
+=== R18 run 3 ===
+Limit  (cost=930.36..930.48 rows=50 width=42) (actual time=4.757..4.762 rows=50.00 loops=1)
+  Buffers: shared hit=760
+  ->  Sort  (cost=930.36..935.57 rows=2085 width=42) (actual time=4.756..4.758 rows=50.00 loops=1)
+        Sort Key: reviews.created_at DESC
+        Sort Method: top-N heapsort  Memory: 33kB
+        Buffers: shared hit=760
+        ->  Append  (cost=25.17..861.09 rows=2085 width=42) (actual time=0.170..4.390 rows=2924.00 loops=1)
+              Buffers: shared hit=757
+              ->  Bitmap Heap Scan on reviews  (cost=25.17..423.50 rows=1467 width=42) (actual time=0.170..1.766 rows=1460.00 loops=1)
+                    Recheck Cond: (review_text ~~* '%cold%'::text)
+                    Heap Blocks: exact=376
+                    Buffers: shared hit=381
+                    ->  Bitmap Index Scan on idx_reviews_text_trgm  (cost=0.00..24.80 rows=1467 width=0) (actual time=0.126..0.126 rows=1460.00 loops=1)
+                          Index Cond: (review_text ~~* '%cold%'::text)
+                          Index Searches: 1
+                          Buffers: shared hit=5
+              ->  Bitmap Heap Scan on reviews reviews_1  (cost=24.98..427.17 rows=618 width=42) (actual time=0.154..2.444 rows=1464.00 loops=1)
+                    Recheck Cond: (review_text ~~* '%late%'::text)
+                    Filter: (review_text !~~* '%cold%'::text)
+                    Heap Blocks: exact=371
+                    Buffers: shared hit=376
+                    ->  Bitmap Index Scan on idx_reviews_text_trgm  (cost=0.00..24.83 rows=1479 width=0) (actual time=0.117..0.117 rows=1464.00 loops=1)
+                          Index Cond: (review_text ~~* '%late%'::text)
+                          Index Searches: 1
+                          Buffers: shared hit=5
+Planning:
+  Buffers: shared hit=155
+Planning Time: 1.370 ms
+Execution Time: 4.838 ms

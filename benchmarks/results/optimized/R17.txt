@@ -1,0 +1,81 @@
+=== R17 run 1 ===
+Sort  (cost=5125.36..5131.01 rows=2259 width=12) (actual time=22.459..22.490 rows=834.00 loops=1)
+  Sort Key: (count(*)) DESC, o.customer_id
+  Sort Method: quicksort  Memory: 51kB
+  Buffers: shared hit=2426 read=33
+  ->  HashAggregate  (cost=4914.81..4999.52 rows=2259 width=12) (actual time=21.892..22.242 rows=834.00 loops=1)
+        Group Key: o.customer_id
+        Filter: (count(*) >= 2)
+        Batches: 1  Memory Usage: 409kB
+        Rows Removed by Filter: 5220
+        Buffers: shared hit=2420 read=33
+        ->  Hash Join  (cost=334.65..4880.92 rows=6777 width=4) (actual time=1.294..20.735 rows=6965.00 loops=1)
+              Hash Cond: (o.order_id = p.order_id)
+              Buffers: shared hit=2420 read=33
+              ->  Seq Scan on orders o  (cost=0.00..3916.00 rows=150000 width=12) (actual time=0.010..8.067 rows=150000.00 loops=1)
+                    Buffers: shared hit=2416
+              ->  Hash  (cost=249.94..249.94 rows=6777 width=8) (actual time=1.267..1.268 rows=6965.00 loops=1)
+                    Buckets: 8192  Batches: 1  Memory Usage: 337kB
+                    Buffers: shared hit=4 read=33
+                    ->  Index Only Scan using idx_payments_failed_attempted_partial on payments p  (cost=0.28..249.94 rows=6777 width=8) (actual time=0.045..0.780 rows=6965.00 loops=1)
+                          Heap Fetches: 0
+                          Index Searches: 1
+                          Buffers: shared hit=4 read=33
+Planning:
+  Buffers: shared hit=468 read=5
+Planning Time: 2.145 ms
+Execution Time: 22.593 ms
+=== R17 run 2 ===
+Sort  (cost=5125.36..5131.01 rows=2259 width=12) (actual time=24.367..24.398 rows=834.00 loops=1)
+  Sort Key: (count(*)) DESC, o.customer_id
+  Sort Method: quicksort  Memory: 51kB
+  Buffers: shared hit=2459
+  ->  HashAggregate  (cost=4914.81..4999.52 rows=2259 width=12) (actual time=23.779..24.144 rows=834.00 loops=1)
+        Group Key: o.customer_id
+        Filter: (count(*) >= 2)
+        Batches: 1  Memory Usage: 409kB
+        Rows Removed by Filter: 5220
+        Buffers: shared hit=2453
+        ->  Hash Join  (cost=334.65..4880.92 rows=6777 width=4) (actual time=1.138..22.602 rows=6965.00 loops=1)
+              Hash Cond: (o.order_id = p.order_id)
+              Buffers: shared hit=2453
+              ->  Seq Scan on orders o  (cost=0.00..3916.00 rows=150000 width=12) (actual time=0.014..8.475 rows=150000.00 loops=1)
+                    Buffers: shared hit=2416
+              ->  Hash  (cost=249.94..249.94 rows=6777 width=8) (actual time=1.103..1.103 rows=6965.00 loops=1)
+                    Buckets: 8192  Batches: 1  Memory Usage: 337kB
+                    Buffers: shared hit=37
+                    ->  Index Only Scan using idx_payments_failed_attempted_partial on payments p  (cost=0.28..249.94 rows=6777 width=8) (actual time=0.008..0.557 rows=6965.00 loops=1)
+                          Heap Fetches: 0
+                          Index Searches: 1
+                          Buffers: shared hit=37
+Planning:
+  Buffers: shared hit=473
+Planning Time: 1.555 ms
+Execution Time: 24.511 ms
+=== R17 run 3 ===
+Sort  (cost=5125.36..5131.01 rows=2259 width=12) (actual time=21.723..21.753 rows=834.00 loops=1)
+  Sort Key: (count(*)) DESC, o.customer_id
+  Sort Method: quicksort  Memory: 51kB
+  Buffers: shared hit=2459
+  ->  HashAggregate  (cost=4914.81..4999.52 rows=2259 width=12) (actual time=21.158..21.515 rows=834.00 loops=1)
+        Group Key: o.customer_id
+        Filter: (count(*) >= 2)
+        Batches: 1  Memory Usage: 409kB
+        Rows Removed by Filter: 5220
+        Buffers: shared hit=2453
+        ->  Hash Join  (cost=334.65..4880.92 rows=6777 width=4) (actual time=1.024..20.069 rows=6965.00 loops=1)
+              Hash Cond: (o.order_id = p.order_id)
+              Buffers: shared hit=2453
+              ->  Seq Scan on orders o  (cost=0.00..3916.00 rows=150000 width=12) (actual time=0.009..7.869 rows=150000.00 loops=1)
+                    Buffers: shared hit=2416
+              ->  Hash  (cost=249.94..249.94 rows=6777 width=8) (actual time=1.001..1.001 rows=6965.00 loops=1)
+                    Buckets: 8192  Batches: 1  Memory Usage: 337kB
+                    Buffers: shared hit=37
+                    ->  Index Only Scan using idx_payments_failed_attempted_partial on payments p  (cost=0.28..249.94 rows=6777 width=8) (actual time=0.006..0.514 rows=6965.00 loops=1)
+                          Heap Fetches: 0
+                          Index Searches: 1
+                          Buffers: shared hit=37
+Planning:
+  Buffers: shared hit=473
+Planning Time: 1.312 ms
+Execution Time: 21.854 ms
