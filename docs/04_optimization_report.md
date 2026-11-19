@@ -100,3 +100,262 @@ For every rewritten query (`R06`, `R09`, `R18`, `R19`, `R23`, plus `R13` verifie
 
 ---
 
+## 5. Before / After `EXPLAIN (ANALYZE, BUFFERS)` Plans for the 5 Biggest Improvements
+
+### 5.1 Query `R23` — 74.508 ms → 0.216 ms (99.7% / 344.9× speedup)
+- **Why it improved:** Replaced deep `OFFSET 100000` scan+sort with keyset pagination `WHERE placed_at < TIMESTAMPTZ '2025-07-02 00:00:00+05:30'` backed by covering index `idx_orders_placed_desc_covering`.
+
+**Before (`baseline` Run 1):**
+```text
+Limit  (cost=21163.95..21164.01 rows=25 width=40) (actual time=65.450..65.459 rows=25.00 loops=1)
+  Buffers: shared hit=2419, temp read=823 written=961
+  ->  Sort  (cost=20913.95..21288.95 rows=150000 width=40) (actual time=55.436..62.171 rows=100025.00 loops=1)
+        Sort Key: placed_at DESC
+        Sort Method: external merge  Disk: 7664kB
+        Buffers: shared hit=2419, temp read=823 written=961
+        ->  Seq Scan on orders  (cost=0.00..3916.00 rows=150000 width=40) (actual time=0.012..19.252 rows=150000.00 loops=1)
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=92
+Planning Time: 0.301 ms
+Execution Time: 69.351 ms
+```
+
+**After (`optimized` Run 1):**
+```text
+Limit  (cost=0.42..1.72 rows=25 width=40) (actual time=0.443..0.448 rows=25.00 loops=1)
+  Buffers: shared hit=2 read=2
+  ->  Index Only Scan using idx_orders_placed_desc_covering on orders  (cost=0.42..2575.19 rows=49587 width=40) (actual time=0.443..0.445 rows=25.00 loops=1)
+        Index Cond: (placed_at < '2025-07-02 00:00:00+05:30'::timestamp with time zone)
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=2 read=2
+Planning:
+  Buffers: shared hit=359
+Planning Time: 1.031 ms
+Execution Time: 0.470 ms
+```
+
+### 5.2 Query `R19` — 8,492.450 ms → 26.455 ms (99.7% / 321.0× speedup)
+- **Why it improved:** Replaced 3 per-restaurant correlated subqueries (which ran 1,200 unindexed Seq Scans on `orders` and `reviews`) with pre-aggregated `LEFT JOIN` subqueries scoped to Bengaluru restaurants and backed by `idx_orders_rest_placed_inc` and `idx_reviews_restaurant_rating_inc`.
+
+**Before (`baseline` Run 1):**
+```text
+Sort  (cost=2461888.30..2461888.92 rows=250 width=67) (actual time=8539.360..8539.405 rows=400.00 loops=1)
+  Sort Key: ((SubPlan 1)) DESC NULLS LAST
+  Sort Method: quicksort  Memory: 49kB
+  Buffers: shared hit=2092850
+  ->  Hash Join  (cost=2.38..2461878.34 rows=250 width=67) (actual time=25.081..8538.993 rows=400.00 loops=1)
+        Hash Cond: (r.locality_id = l.locality_id)
+        Buffers: shared hit=2092847
+        ->  Seq Scan on restaurants r  (cost=0.00..71.00 rows=2500 width=21) (actual time=0.004..0.378 rows=2500.00 loops=1)
+              Buffers: shared hit=46
+        ->  Hash  (cost=2.25..2.25 rows=10 width=2) (actual time=0.014..0.015 rows=10.00 loops=1)
+              Buckets: 1024  Batches: 1  Memory Usage: 9kB
+              Buffers: shared hit=1
+              ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.007..0.011 rows=10.00 loops=1)
+                    Filter: (city_id = 1)
+                    Rows Removed by Filter: 90
+                    Buffers: shared hit=1
+        SubPlan 1
+          ->  Aggregate  (cost=4291.16..4291.17 rows=1 width=8) (actual time=6.900..6.900 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=63 width=8) (actual time=0.375..6.891 rows=60.27 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 149940
+                      Buffers: shared hit=966400
+        SubPlan 2
+          ->  Aggregate  (cost=4666.14..4666.15 rows=1 width=8) (actual time=12.330..12.330 rows=1.00 loops=400)
+                Buffers: shared hit=966400
+                ->  Seq Scan on orders o_1  (cost=0.00..4666.00 rows=54 width=0) (actual time=0.702..12.323 rows=52.38 loops=400)
+                      Filter: ((restaurant_id = r.restaurant_id) AND ((status)::text = 'DELIVERED'::text))
+                      Rows Removed by Filter: 149948
+                      Buffers: shared hit=966400
+        SubPlan 3
+          ->  Aggregate  (cost=889.87..889.88 rows=1 width=32) (actual time=2.113..2.113 rows=1.00 loops=400)
+                Buffers: shared hit=160000
+                ->  Seq Scan on reviews v  (cost=0.00..889.83 rows=16 width=2) (actual time=0.201..2.107 rows=15.77 loops=400)
+                      Filter: (restaurant_id = r.restaurant_id)
+                      Rows Removed by Filter: 39170
+                      Buffers: shared hit=160000
+Planning:
+  Buffers: shared hit=350
+Planning Time: 0.992 ms
+Execution Time: 8539.527 ms
+```
+
+**After (`optimized` Run 1):**
+```text
+Sort  (cost=2495.63..2496.25 rows=250 width=310) (actual time=56.722..56.740 rows=400.00 loops=1)
+  Sort Key: (max(o.placed_at)) DESC NULLS LAST
+  Sort Method: quicksort  Memory: 49kB
+  Buffers: shared hit=1639 read=620
+  CTE blr_rest
+    ->  Nested Loop  (cost=0.28..47.92 rows=250 width=19) (actual time=0.060..0.141 rows=400.00 loops=1)
+          Buffers: shared hit=27
+          ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.006..0.011 rows=10.00 loops=1)
+                Filter: (city_id = 1)
+                Rows Removed by Filter: 90
+                Buffers: shared hit=1
+          ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.32 rows=25 width=21) (actual time=0.007..0.010 rows=40.00 loops=10)
+                Index Cond: (locality_id = l.locality_id)
+                Heap Fetches: 0
+                Index Searches: 10
+                Buffers: shared hit=26
+  ->  Hash Right Join  (cost=2366.53..2437.74 rows=250 width=310) (actual time=56.440..56.633 rows=400.00 loops=1)
+        Hash Cond: (v.restaurant_id = b.restaurant_id)
+        Buffers: shared hit=1636 read=620
+        ->  HashAggregate  (cost=647.99..683.84 rows=2390 width=36) (actual time=5.044..5.162 rows=384.00 loops=1)
+              Group Key: v.restaurant_id
+              Batches: 1  Memory Usage: 129kB
+              Buffers: shared hit=713 read=106
+              ->  Nested Loop  (cost=0.29..627.50 rows=4099 width=6) (actual time=0.163..4.388 rows=6306.00 loops=1)
+                    Buffers: shared hit=713 read=106
+                    ->  CTE Scan on blr_rest b3  (cost=0.00..5.00 rows=250 width=4) (actual time=0.000..0.021 rows=400.00 loops=1)
+                          Storage: Memory  Maximum Storage: 35kB
+                    ->  Index Only Scan using idx_reviews_restaurant_rating_inc on reviews v  (cost=0.29..2.33 rows=16 width=6) (actual time=0.009..0.010 rows=15.77 loops=400)
+                          Index Cond: (restaurant_id = b3.restaurant_id)
+                          Heap Fetches: 0
+                          Index Searches: 400
+                          Buffers: shared hit=713 read=106
+        ->  Hash  (cost=1715.41..1715.41 rows=250 width=278) (actual time=51.387..51.389 rows=400.00 loops=1)
+              Buckets: 1024  Batches: 1  Memory Usage: 36kB
+              Buffers: shared hit=923 read=514
+              ->  Hash Right Join  (cost=1656.15..1715.41 rows=250 width=278) (actual time=51.191..51.313 rows=400.00 loops=1)
+                    Hash Cond: (o.restaurant_id = b.restaurant_id)
+                    Buffers: shared hit=923 read=514
+                    ->  HashAggregate  (cost=1648.02..1671.92 rows=2390 width=20) (actual time=50.946..50.996 rows=384.00 loops=1)
+                          Group Key: o.restaurant_id
+                          Batches: 1  Memory Usage: 121kB
+                          Buffers: shared hit=896 read=514
+                          ->  Nested Loop  (cost=0.42..1491.12 rows=15690 width=23) (actual time=0.167..48.284 rows=24106.00 loops=1)
+                                Buffers: shared hit=896 read=514
+                                ->  CTE Scan on blr_rest b2  (cost=0.00..5.00 rows=250 width=4) (actual time=0.000..0.038 rows=400.00 loops=1)
+                                      Storage: Memory  Maximum Storage: 35kB
+                                ->  Index Only Scan using idx_orders_rest_placed_inc on orders o  (cost=0.42..5.31 rows=63 width=23) (actual time=0.095..0.116 rows=60.27 loops=400)
+                                      Index Cond: (restaurant_id = b2.restaurant_id)
+                                      Heap Fetches: 46
+                                      Index Searches: 400
+                                      Buffers: shared hit=896 read=514
+                    ->  Hash  (cost=5.00..5.00 rows=250 width=262) (actual time=0.236..0.237 rows=400.00 loops=1)
+                          Buckets: 1024  Batches: 1  Memory Usage: 29kB
+                          Buffers: shared hit=27
+                          ->  CTE Scan on blr_rest b  (cost=0.00..5.00 rows=250 width=262) (actual time=0.062..0.209 rows=400.00 loops=1)
+                                Storage: Memory  Maximum Storage: 35kB
+                                Buffers: shared hit=27
+Planning:
+  Buffers: shared hit=729 read=3
+Planning Time: 2.516 ms
+Execution Time: 56.884 ms
+```
+
+### 5.3 Query `R12` — 17.034 ms → 0.156 ms (99.1% / 109.2× speedup)
+- **Why it improved:** Created partial covering index `idx_orders_unassigned_dispatch_partial (placed_at) INCLUDE (order_id, restaurant_id, status) WHERE partner_id IS NULL AND status IN ('PLACED', 'ACCEPTED')` (16 kB total size), turning a 150,000-row Seq Scan + Sort into a 50-row Index Only Scan.
+
+**Before (`baseline` Run 1):**
+```text
+Limit  (cost=4291.06..4291.07 rows=5 width=31) (actual time=16.343..16.349 rows=50.00 loops=1)
+  Buffers: shared hit=2419
+  ->  Sort  (cost=4291.06..4291.07 rows=5 width=31) (actual time=16.343..16.345 rows=50.00 loops=1)
+        Sort Key: placed_at
+        Sort Method: quicksort  Memory: 30kB
+        Buffers: shared hit=2419
+        ->  Seq Scan on orders o  (cost=0.00..4291.00 rows=5 width=31) (actual time=16.294..16.319 rows=75.00 loops=1)
+              Filter: ((partner_id IS NULL) AND ((status)::text = ANY ('{PLACED,ACCEPTED}'::text[])))
+              Rows Removed by Filter: 149925
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=148
+Planning Time: 0.369 ms
+Execution Time: 16.371 ms
+```
+
+**After (`optimized` Run 1):**
+```text
+Limit  (cost=0.14..8.23 rows=6 width=31) (actual time=0.294..0.301 rows=50.00 loops=1)
+  Buffers: shared hit=1 read=1
+  ->  Index Only Scan using idx_orders_unassigned_dispatch_partial on orders o  (cost=0.14..8.23 rows=6 width=31) (actual time=0.294..0.297 rows=50.00 loops=1)
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=1 read=1
+Planning:
+  Buffers: shared hit=400
+Planning Time: 0.984 ms
+Execution Time: 0.319 ms
+```
+
+### 5.4 Query `R05` — 12.035 ms → 0.135 ms (98.9% / 89.1× speedup)
+- **Why it improved:** Created partial covering index `idx_orders_preparing_accepted_partial (accepted_at) INCLUDE (order_id, restaurant_id) WHERE status = 'PREPARING'` (16 kB total size), eliminating the Parallel Seq Scan over 150,000 orders.
+
+**Before (`baseline` Run 1):**
+```text
+Gather Merge  (cost=4960.45..4963.53 rows=27 width=20) (actual time=11.302..12.531 rows=35.00 loops=1)
+  Workers Planned: 1
+  Workers Launched: 1
+  Buffers: shared hit=2454
+  ->  Sort  (cost=3960.44..3960.48 rows=16 width=20) (actual time=8.830..8.831 rows=17.50 loops=2)
+        Sort Key: accepted_at
+        Sort Method: quicksort  Memory: 25kB
+        Buffers: shared hit=2454
+        Worker 0:  Sort Method: quicksort  Memory: 25kB
+        ->  Parallel Seq Scan on orders  (cost=0.00..3960.12 rows=16 width=20) (actual time=8.789..8.802 rows=17.50 loops=2)
+              Filter: (((status)::text = 'PREPARING'::text) AND (accepted_at < ('2026-06-30 23:59:00+05:30'::timestamp with time zone - '00:40:00'::interval)))
+              Rows Removed by Filter: 74982
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=94
+Planning Time: 0.400 ms
+Execution Time: 12.559 ms
+```
+
+**After (`optimized` Run 1):**
+```text
+Index Only Scan using idx_orders_preparing_accepted_partial on orders  (cost=0.14..12.70 rows=32 width=20) (actual time=0.218..0.226 rows=35.00 loops=1)
+  Index Cond: (accepted_at < ('2026-06-30 23:59:00+05:30'::timestamp with time zone - '00:40:00'::interval))
+  Heap Fetches: 6
+  Index Searches: 1
+  Buffers: shared hit=2 read=1
+Planning:
+  Buffers: shared hit=355
+Planning Time: 1.306 ms
+Execution Time: 0.245 ms
+```
+
+### 5.5 Query `R06` — 8.678 ms → 0.128 ms (98.5% / 67.8× speedup)
+- **Why it improved:** Rewrote non-sargable `DATE(placed_at) = '2026-06-15'` into a sargable timestamp range `placed_at >= '2026-06-15 00:00:00+05:30' AND placed_at < '2026-06-16 00:00:00+05:30'` backed by covering index `idx_orders_rest_placed_inc`.
+
+**Before (`baseline` Run 1):**
+```text
+Sort  (cost=4960.23..4960.23 rows=1 width=32) (actual time=7.722..8.622 rows=1.00 loops=1)
+  Sort Key: placed_at
+  Sort Method: quicksort  Memory: 25kB
+  Buffers: shared hit=2419
+  ->  Gather  (cost=1000.00..4960.22 rows=1 width=32) (actual time=7.477..8.606 rows=1.00 loops=1)
+        Workers Planned: 1
+        Workers Launched: 1
+        Buffers: shared hit=2416
+        ->  Parallel Seq Scan on orders  (cost=0.00..3960.12 rows=1 width=32) (actual time=6.113..6.206 rows=0.50 loops=2)
+              Filter: ((restaurant_id = 217) AND (date(placed_at) = '2026-06-15'::date))
+              Rows Removed by Filter: 75000
+              Buffers: shared hit=2416
+Planning:
+  Buffers: shared hit=103
+Planning Time: 0.299 ms
+Execution Time: 8.670 ms
+```
+
+**After (`optimized` Run 1):**
+```text
+Index Only Scan using idx_orders_rest_placed_inc on orders  (cost=0.42..8.44 rows=1 width=32) (actual time=0.217..0.217 rows=1.00 loops=1)
+  Index Cond: ((restaurant_id = 217) AND (placed_at >= '2026-06-15 00:00:00+05:30'::timestamp with time zone) AND (placed_at < '2026-06-16 00:00:00+05:30'::timestamp with time zone))
+  Heap Fetches: 0
+  Index Searches: 1
+  Buffers: shared hit=3 read=1
+Planning:
+  Buffers: shared hit=362
+Planning Time: 0.986 ms
+Execution Time: 0.237 ms
+```
+
+---
+
