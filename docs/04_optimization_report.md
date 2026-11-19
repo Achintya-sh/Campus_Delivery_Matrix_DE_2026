@@ -359,3 +359,15 @@ Execution Time: 0.237 ms
 
 ---
 
+## 6. Write Overhead Analysis (`W01`–`W05`)
+
+| Write Query | Operation | Before (ms) | After (ms) | Delta (ms) | Analysis & Acceptability |
+| :--- | :--- | ---: | ---: | ---: | :--- |
+| **W01** | `INSERT INTO orders` (1 new `PLACED` row) | `1.507` | `1.883` | **`+0.376 ms`** (`+24.9%`) | **Acceptable:** Updating the applicable B-tree indexes on `orders` (note that partial indexes for `DELIVERED` and `PREPARING` are skipped automatically for a `PLACED` order!) adds only `0.376 ms`, keeping `W01` at `1.883 ms` (well below the `< 5 ms` real-time SLA). |
+| **W02** | `UPDATE orders` (assign partner 150 to oldest `ACCEPTED` order) | `17.305` | `1.003` | **`-16.302 ms`** (`17.3×` faster) | **Net Speedup:** Although updating `partner_id` and `status` modifies index entries, the partial index `idx_orders_unassigned_dispatch_partial` eliminates the `17 ms` full table scan + sort in the `WHERE` subquery! |
+| **W03** | `UPDATE menu_items` (hide desserts for restaurant 217) | `3.443` | `0.355` | **`-3.088 ms`** (`9.7×` faster) | **Net Speedup:** `idx_menu_items_rest_category` replaces a 50,000-row Seq Scan with a 3-row Index Scan, far outweighing the cost of removing 3 rows from `idx_menu_items_rest_avail_sort`. |
+| **W04** | `UPDATE restaurants` (nightly rating recomputation from `reviews`) | `19.338` | `28.915` | **`+9.577 ms`** (`+49.5%`) | **Acceptable:** `W04` updates `rating` on `2,390` out of `2,500` restaurants (`95.6%` of the table), which requires updating `idx_restaurants_loc_status_rating` (since `rating` is a key column). An extra `9.58 ms` in a once-a-night batch job (`28.915 ms` vs `< 2,000 ms` target) is a negligible trade-off for sub-millisecond home-feed queries (`R01`, `R25`). |
+| **W05** | `UPDATE customers` (nightly Gold membership expiration) | `25.643` | `20.461` | **`-5.182 ms`** (`20.2%` faster) | **Net Speedup:** Partial index `idx_customers_gold_expires_partial` allows PostgreSQL to jump directly to the `1,923` expired Gold members via Bitmap Index Scan instead of scanning all `25,000` customers. |
+
+---
+
