@@ -405,3 +405,13 @@ Measured via `pg_relation_size()` in PostgreSQL after `VACUUM ANALYZE`:
 
 ---
 
+## 8. Queries That Could Not Be Dramatically Sped Up (and Why)
+
+1. **`R09` (`46.048 ms → 42.002 ms`, `8.8%` improvement):**
+   - *Why:* `R09` computes average delivery minutes for every city and every month of 2026 across all `DELIVERED` orders. Because the seed data spans 18 months (`Jan 2025 – Jun 2026`), the 6 months of 2026 represent roughly one-third of all delivered orders (`~43,500` rows). Even with a sargable date range and an `Index Only Scan` on `idx_orders_placed_desc_covering`, PostgreSQL still must read, join to `restaurants` and `localities`, extract epoch differences, and hash-aggregate all `~43,500` rows. Without pre-aggregating into a summary table/materialized view, reading one-third of the dataset has an inherent $O(N)$ floor.
+2. **`R17` (`32.470 ms → 22.986 ms`, `29.2%` improvement):**
+   - *Why:* `R17` aggregates all-time failed payment attempts across **all** orders (`6,965` failed payment rows spread across `150,000` orders). Our partial index `idx_payments_failed_attempted_partial` eliminated scanning the `130,413` non-failed payments (`Index Only Scan` on `296 kB` instead of `10 MB`), but joining `6,965` distinct `order_id`s across `orders` and hash-aggregating by `customer_id` still requires scanning/hashing across the order keyspace.
+3. **`R08` (`12.508 ms → 9.029 ms`, `27.8%` improvement):**
+   - *Why:* `R08` computes top-3 bestseller dishes across every restaurant in Pune over the last 30 days, requiring a join between `orders` and `order_items` (`375,000` rows) followed by a `RANK() OVER (PARTITION BY o.restaurant_id ...)` window sort.
+4. **`W04` (`19.338 ms → 28.915 ms`, `-49.5%`):**
+   - *Why:* `W04` is an unconstrained nightly bulk `UPDATE` that recomputes `rating` and `rating_count` from all `39,186` `reviews` and writes to `2,390` of the `2,500` rows in `restaurants`. Because it must read 100% of `reviews` and modify 95.6% of `restaurants` (plus maintain `idx_restaurants_loc_status_rating`), no index can reduce the number of rows read or written.
