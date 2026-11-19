@@ -1,0 +1,141 @@
+=== R08 run 1 ===
+Incremental Sort  (cost=2472.11..2563.59 rows=1814 width=24) (actual time=20.124..20.464 rows=617.00 loops=1)
+  Sort Key: o.restaurant_id, (rank() OVER w1)
+  Presorted Key: o.restaurant_id
+  Full-sort Groups: 19  Sort Method: quicksort  Average Memory: 26kB  Peak Memory: 26kB
+  Buffers: shared hit=2693 read=210
+  ->  WindowAgg  (cost=2471.78..2508.06 rows=1814 width=24) (actual time=20.091..20.374 rows=617.00 loops=1)
+        Window: w1 AS (PARTITION BY o.restaurant_id ORDER BY (sum(oi.quantity)) ROWS UNBOUNDED PRECEDING)
+        Run Condition: (rank() OVER w1 <= 3)
+        Storage: Memory  Maximum Storage: 17kB
+        Buffers: shared hit=2687 read=210
+        ->  Sort  (cost=2471.78..2476.32 rows=1814 width=16) (actual time=20.082..20.125 rows=1160.00 loops=1)
+              Sort Key: o.restaurant_id, (sum(oi.quantity)) DESC
+              Sort Method: quicksort  Memory: 85kB
+              Buffers: shared hit=2687 read=210
+              ->  HashAggregate  (cost=2355.46..2373.60 rows=1814 width=16) (actual time=19.766..19.868 rows=1160.00 loops=1)
+                    Group Key: o.restaurant_id, oi.item_id
+                    Batches: 1  Memory Usage: 121kB
+                    Buffers: shared hit=2687 read=210
+                    ->  Nested Loop  (cost=1.12..2341.85 rows=1814 width=10) (actual time=0.513..19.500 rows=1390.00 loops=1)
+                          Buffers: shared hit=2687 read=210
+                          ->  Nested Loop  (cost=0.70..439.20 rows=726 width=12) (actual time=0.499..18.089 rows=566.00 loops=1)
+                                Buffers: shared hit=419 read=210
+                                ->  Nested Loop  (cost=0.28..47.92 rows=250 width=4) (actual time=0.165..0.353 rows=200.00 loops=1)
+                                      Buffers: shared hit=21 read=4
+                                      ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.006..0.010 rows=10.00 loops=1)
+                                            Filter: (city_id = 6)
+                                            Rows Removed by Filter: 90
+                                            Buffers: shared hit=1
+                                      ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.32 rows=25 width=6) (actual time=0.017..0.032 rows=20.00 loops=10)
+                                            Index Cond: (locality_id = l.locality_id)
+                                            Heap Fetches: 0
+                                            Index Searches: 10
+                                            Buffers: shared hit=20 read=4
+                                ->  Index Only Scan using idx_orders_rest_placed_delivered_inc on orders o  (cost=0.42..1.54 rows=3 width=12) (actual time=0.088..0.088 rows=2.83 loops=200)
+                                      Index Cond: ((restaurant_id = r.restaurant_id) AND (placed_at >= '2026-06-01 00:00:00+05:30'::timestamp with time zone))
+                                      Heap Fetches: 0
+                                      Index Searches: 200
+                                      Buffers: shared hit=398 read=206
+                          ->  Index Scan using order_items_pkey on order_items oi  (cost=0.42..2.59 rows=3 width=14) (actual time=0.002..0.002 rows=2.46 loops=566)
+                                Index Cond: (order_id = o.order_id)
+                                Index Searches: 566
+                                Buffers: shared hit=2268
+Planning:
+  Buffers: shared hit=734
+Planning Time: 2.178 ms
+Execution Time: 20.733 ms
+=== R08 run 2 ===
+Incremental Sort  (cost=2472.11..2563.59 rows=1814 width=24) (actual time=2.759..3.099 rows=617.00 loops=1)
+  Sort Key: o.restaurant_id, (rank() OVER w1)
+  Presorted Key: o.restaurant_id
+  Full-sort Groups: 19  Sort Method: quicksort  Average Memory: 26kB  Peak Memory: 26kB
+  Buffers: shared hit=2903
+  ->  WindowAgg  (cost=2471.78..2508.06 rows=1814 width=24) (actual time=2.725..3.010 rows=617.00 loops=1)
+        Window: w1 AS (PARTITION BY o.restaurant_id ORDER BY (sum(oi.quantity)) ROWS UNBOUNDED PRECEDING)
+        Run Condition: (rank() OVER w1 <= 3)
+        Storage: Memory  Maximum Storage: 17kB
+        Buffers: shared hit=2897
+        ->  Sort  (cost=2471.78..2476.32 rows=1814 width=16) (actual time=2.716..2.757 rows=1160.00 loops=1)
+              Sort Key: o.restaurant_id, (sum(oi.quantity)) DESC
+              Sort Method: quicksort  Memory: 85kB
+              Buffers: shared hit=2897
+              ->  HashAggregate  (cost=2355.46..2373.60 rows=1814 width=16) (actual time=2.405..2.506 rows=1160.00 loops=1)
+                    Group Key: o.restaurant_id, oi.item_id
+                    Batches: 1  Memory Usage: 121kB
+                    Buffers: shared hit=2897
+                    ->  Nested Loop  (cost=1.12..2341.85 rows=1814 width=10) (actual time=0.047..2.172 rows=1390.00 loops=1)
+                          Buffers: shared hit=2897
+                          ->  Nested Loop  (cost=0.70..439.20 rows=726 width=12) (actual time=0.036..0.837 rows=566.00 loops=1)
+                                Buffers: shared hit=629
+                                ->  Nested Loop  (cost=0.28..47.92 rows=250 width=4) (actual time=0.019..0.074 rows=200.00 loops=1)
+                                      Buffers: shared hit=25
+                                      ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.006..0.010 rows=10.00 loops=1)
+                                            Filter: (city_id = 6)
+                                            Rows Removed by Filter: 90
+                                            Buffers: shared hit=1
+                                      ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.32 rows=25 width=6) (actual time=0.003..0.005 rows=20.00 loops=10)
+                                            Index Cond: (locality_id = l.locality_id)
+                                            Heap Fetches: 0
+                                            Index Searches: 10
+                                            Buffers: shared hit=24
+                                ->  Index Only Scan using idx_orders_rest_placed_delivered_inc on orders o  (cost=0.42..1.54 rows=3 width=12) (actual time=0.003..0.003 rows=2.83 loops=200)
+                                      Index Cond: ((restaurant_id = r.restaurant_id) AND (placed_at >= '2026-06-01 00:00:00+05:30'::timestamp with time zone))
+                                      Heap Fetches: 0
+                                      Index Searches: 200
+                                      Buffers: shared hit=604
+                          ->  Index Scan using order_items_pkey on order_items oi  (cost=0.42..2.59 rows=3 width=14) (actual time=0.002..0.002 rows=2.46 loops=566)
+                                Index Cond: (order_id = o.order_id)
+                                Index Searches: 566
+                                Buffers: shared hit=2268
+Planning:
+  Buffers: shared hit=734
+Planning Time: 2.220 ms
+Execution Time: 3.206 ms
+=== R08 run 3 ===
+Incremental Sort  (cost=2472.11..2563.59 rows=1814 width=24) (actual time=2.708..3.045 rows=617.00 loops=1)
+  Sort Key: o.restaurant_id, (rank() OVER w1)
+  Presorted Key: o.restaurant_id
+  Full-sort Groups: 19  Sort Method: quicksort  Average Memory: 26kB  Peak Memory: 26kB
+  Buffers: shared hit=2903
+  ->  WindowAgg  (cost=2471.78..2508.06 rows=1814 width=24) (actual time=2.677..2.956 rows=617.00 loops=1)
+        Window: w1 AS (PARTITION BY o.restaurant_id ORDER BY (sum(oi.quantity)) ROWS UNBOUNDED PRECEDING)
+        Run Condition: (rank() OVER w1 <= 3)
+        Storage: Memory  Maximum Storage: 17kB
+        Buffers: shared hit=2897
+        ->  Sort  (cost=2471.78..2476.32 rows=1814 width=16) (actual time=2.669..2.710 rows=1160.00 loops=1)
+              Sort Key: o.restaurant_id, (sum(oi.quantity)) DESC
+              Sort Method: quicksort  Memory: 85kB
+              Buffers: shared hit=2897
+              ->  HashAggregate  (cost=2355.46..2373.60 rows=1814 width=16) (actual time=2.364..2.463 rows=1160.00 loops=1)
+                    Group Key: o.restaurant_id, oi.item_id
+                    Batches: 1  Memory Usage: 121kB
+                    Buffers: shared hit=2897
+                    ->  Nested Loop  (cost=1.12..2341.85 rows=1814 width=10) (actual time=0.045..2.139 rows=1390.00 loops=1)
+                          Buffers: shared hit=2897
+                          ->  Nested Loop  (cost=0.70..439.20 rows=726 width=12) (actual time=0.032..0.819 rows=566.00 loops=1)
+                                Buffers: shared hit=629
+                                ->  Nested Loop  (cost=0.28..47.92 rows=250 width=4) (actual time=0.016..0.073 rows=200.00 loops=1)
+                                      Buffers: shared hit=25
+                                      ->  Seq Scan on localities l  (cost=0.00..2.25 rows=10 width=2) (actual time=0.006..0.009 rows=10.00 loops=1)
+                                            Filter: (city_id = 6)
+                                            Rows Removed by Filter: 90
+                                            Buffers: shared hit=1
+                                      ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.32 rows=25 width=6) (actual time=0.002..0.005 rows=20.00 loops=10)
+                                            Index Cond: (locality_id = l.locality_id)
+                                            Heap Fetches: 0
+                                            Index Searches: 10
+                                            Buffers: shared hit=24
+                                ->  Index Only Scan using idx_orders_rest_placed_delivered_inc on orders o  (cost=0.42..1.54 rows=3 width=12) (actual time=0.003..0.003 rows=2.83 loops=200)
+                                      Index Cond: ((restaurant_id = r.restaurant_id) AND (placed_at >= '2026-06-01 00:00:00+05:30'::timestamp with time zone))
+                                      Heap Fetches: 0
+                                      Index Searches: 200
+                                      Buffers: shared hit=604
+                          ->  Index Scan using order_items_pkey on order_items oi  (cost=0.42..2.59 rows=3 width=14) (actual time=0.002..0.002 rows=2.46 loops=566)
+                                Index Cond: (order_id = o.order_id)
+                                Index Searches: 566
+                                Buffers: shared hit=2268
+Planning:
+  Buffers: shared hit=734
+Planning Time: 2.206 ms
+Execution Time: 3.148 ms

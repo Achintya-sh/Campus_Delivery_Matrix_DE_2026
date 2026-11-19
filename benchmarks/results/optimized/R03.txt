@@ -1,0 +1,30 @@
+=== R03 run 1 ===
+Index Only Scan using idx_menu_items_rest_avail_sort on menu_items  (cost=0.41..4.75 rows=19 width=29) (actual time=0.079..0.080 rows=18.00 loops=1)
+  Index Cond: (restaurant_id = 217)
+  Heap Fetches: 0
+  Index Searches: 1
+  Buffers: shared hit=2 read=2
+Planning:
+  Buffers: shared hit=193
+Planning Time: 0.537 ms
+Execution Time: 0.117 ms
+=== R03 run 2 ===
+Index Only Scan using idx_menu_items_rest_avail_sort on menu_items  (cost=0.41..4.75 rows=19 width=29) (actual time=0.061..0.063 rows=18.00 loops=1)
+  Index Cond: (restaurant_id = 217)
+  Heap Fetches: 0
+  Index Searches: 1
+  Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=193
+Planning Time: 0.498 ms
+Execution Time: 0.097 ms
+=== R03 run 3 ===
+Index Only Scan using idx_menu_items_rest_avail_sort on menu_items  (cost=0.41..4.75 rows=19 width=29) (actual time=0.053..0.055 rows=18.00 loops=1)
+  Index Cond: (restaurant_id = 217)
+  Heap Fetches: 0
+  Index Searches: 1
+  Buffers: shared hit=4
+Planning:
+  Buffers: shared hit=193
+Planning Time: 0.562 ms
+Execution Time: 0.090 ms

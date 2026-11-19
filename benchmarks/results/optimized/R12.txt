@@ -1,0 +1,33 @@
+=== R12 run 1 ===
+Limit  (cost=0.14..8.23 rows=6 width=31) (actual time=0.294..0.301 rows=50.00 loops=1)
+  Buffers: shared hit=1 read=1
+  ->  Index Only Scan using idx_orders_unassigned_dispatch_partial on orders o  (cost=0.14..8.23 rows=6 width=31) (actual time=0.294..0.297 rows=50.00 loops=1)
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=1 read=1
+Planning:
+  Buffers: shared hit=400
+Planning Time: 0.984 ms
+Execution Time: 0.319 ms
+=== R12 run 2 ===
+Limit  (cost=0.14..8.23 rows=6 width=31) (actual time=0.049..0.056 rows=50.00 loops=1)
+  Buffers: shared hit=2
+  ->  Index Only Scan using idx_orders_unassigned_dispatch_partial on orders o  (cost=0.14..8.23 rows=6 width=31) (actual time=0.048..0.052 rows=50.00 loops=1)
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=2
+Planning:
+  Buffers: shared hit=400
+Planning Time: 1.064 ms
+Execution Time: 0.077 ms
+=== R12 run 3 ===
+Limit  (cost=0.14..8.23 rows=6 width=31) (actual time=0.046..0.053 rows=50.00 loops=1)
+  Buffers: shared hit=2
+  ->  Index Only Scan using idx_orders_unassigned_dispatch_partial on orders o  (cost=0.14..8.23 rows=6 width=31) (actual time=0.046..0.049 rows=50.00 loops=1)
+        Heap Fetches: 0
+        Index Searches: 1
+        Buffers: shared hit=2
+Planning:
+  Buffers: shared hit=400
+Planning Time: 1.017 ms
+Execution Time: 0.072 ms

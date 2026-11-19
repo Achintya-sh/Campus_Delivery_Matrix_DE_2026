@@ -1,0 +1,66 @@
+=== R01 run 1 ===
+Limit  (cost=7.68..7.73 rows=20 width=73) (actual time=0.426..0.429 rows=20.00 loops=1)
+  Buffers: shared hit=5 read=2
+  ->  Sort  (cost=7.68..7.74 rows=22 width=73) (actual time=0.425..0.426 rows=20.00 loops=1)
+        Sort Key: r.rating DESC NULLS LAST
+        Sort Method: quicksort  Memory: 29kB
+        Buffers: shared hit=5 read=2
+        ->  Nested Loop  (cost=0.28..7.19 rows=22 width=73) (actual time=0.383..0.393 rows=34.00 loops=1)
+              Buffers: shared hit=2 read=2
+              ->  Seq Scan on localities l  (cost=0.00..2.25 rows=1 width=2) (actual time=0.005..0.010 rows=1.00 loops=1)
+                    Filter: ((locality_name)::text = 'Koramangala'::text)
+                    Rows Removed by Filter: 99
+                    Buffers: shared hit=1
+              ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.72 rows=22 width=75) (actual time=0.377..0.379 rows=34.00 loops=1)
+                    Index Cond: ((locality_id = l.locality_id) AND (status = 'OPEN'::text))
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=1 read=2
+Planning:
+  Buffers: shared hit=336
+Planning Time: 1.447 ms
+Execution Time: 0.482 ms
+=== R01 run 2 ===
+Limit  (cost=7.68..7.73 rows=20 width=73) (actual time=0.109..0.113 rows=20.00 loops=1)
+  Buffers: shared hit=7
+  ->  Sort  (cost=7.68..7.74 rows=22 width=73) (actual time=0.108..0.110 rows=20.00 loops=1)
+        Sort Key: r.rating DESC NULLS LAST
+        Sort Method: quicksort  Memory: 29kB
+        Buffers: shared hit=7
+        ->  Nested Loop  (cost=0.28..7.19 rows=22 width=73) (actual time=0.068..0.080 rows=34.00 loops=1)
+              Buffers: shared hit=4
+              ->  Seq Scan on localities l  (cost=0.00..2.25 rows=1 width=2) (actual time=0.004..0.010 rows=1.00 loops=1)
+                    Filter: ((locality_name)::text = 'Koramangala'::text)
+                    Rows Removed by Filter: 99
+                    Buffers: shared hit=1
+              ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.72 rows=22 width=75) (actual time=0.063..0.065 rows=34.00 loops=1)
+                    Index Cond: ((locality_id = l.locality_id) AND (status = 'OPEN'::text))
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=3
+Planning:
+  Buffers: shared hit=346
+Planning Time: 0.986 ms
+Execution Time: 0.152 ms
+=== R01 run 3 ===
+Limit  (cost=7.68..7.73 rows=20 width=73) (actual time=0.114..0.116 rows=20.00 loops=1)
+  Buffers: shared hit=7
+  ->  Sort  (cost=7.68..7.74 rows=22 width=73) (actual time=0.113..0.114 rows=20.00 loops=1)
+        Sort Key: r.rating DESC NULLS LAST
+        Sort Method: quicksort  Memory: 29kB
+        Buffers: shared hit=7
+        ->  Nested Loop  (cost=0.28..7.19 rows=22 width=73) (actual time=0.069..0.080 rows=34.00 loops=1)
+              Buffers: shared hit=4
+              ->  Seq Scan on localities l  (cost=0.00..2.25 rows=1 width=2) (actual time=0.004..0.010 rows=1.00 loops=1)
+                    Filter: ((locality_name)::text = 'Koramangala'::text)
+                    Rows Removed by Filter: 99
+                    Buffers: shared hit=1
+              ->  Index Only Scan using idx_restaurants_loc_status_rating on restaurants r  (cost=0.28..4.72 rows=22 width=75) (actual time=0.064..0.067 rows=34.00 loops=1)
+                    Index Cond: ((locality_id = l.locality_id) AND (status = 'OPEN'::text))
+                    Heap Fetches: 0
+                    Index Searches: 1
+                    Buffers: shared hit=3
+Planning:
+  Buffers: shared hit=346
+Planning Time: 0.958 ms
+Execution Time: 0.149 ms
