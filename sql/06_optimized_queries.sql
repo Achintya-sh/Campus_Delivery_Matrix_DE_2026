@@ -194,21 +194,50 @@ ORDER BY failed_attempts DESC, o.customer_id;
 
 -- @R18
 -- Review moderation: newest reviews that complain about cold food or late delivery
+-- [REWRITTEN]: Replaced OR across ILIKE predicates with disjoint UNION ALL branches
 SELECT review_id, restaurant_id, food_rating, review_text, created_at
-FROM reviews
-WHERE review_text ILIKE '%cold%' OR review_text ILIKE '%late%'
+FROM (
+    SELECT review_id, restaurant_id, food_rating, review_text, created_at
+    FROM reviews
+    WHERE review_text ILIKE '%cold%'
+    UNION ALL
+    SELECT review_id, restaurant_id, food_rating, review_text, created_at
+    FROM reviews
+    WHERE review_text ILIKE '%late%'
+      AND NOT (review_text ILIKE '%cold%')
+) t
 ORDER BY created_at DESC
 LIMIT 50;
 
 -- @R19
 -- Restaurant health report for Bengaluru: last order time, delivered orders and average food rating
-SELECT r.restaurant_id, r.name,
-       (SELECT max(o.placed_at) FROM orders o WHERE o.restaurant_id = r.restaurant_id) AS last_order_at,
-       (SELECT count(*) FROM orders o WHERE o.restaurant_id = r.restaurant_id AND o.status = 'DELIVERED') AS delivered_orders,
-       (SELECT round(avg(v.food_rating), 2) FROM reviews v WHERE v.restaurant_id = r.restaurant_id) AS avg_food_rating
-FROM restaurants r
-JOIN localities l ON l.locality_id = r.locality_id
-WHERE l.city_id = 1
+-- [REWRITTEN]: Replaced 3 correlated subqueries with pre-aggregated LEFT JOINs over Bengaluru restaurants
+WITH blr_rest AS (
+    SELECT r.restaurant_id, r.name
+    FROM restaurants r
+    JOIN localities l ON l.locality_id = r.locality_id
+    WHERE l.city_id = 1
+)
+SELECT b.restaurant_id, b.name,
+       ord.last_order_at,
+       coalesce(ord.delivered_orders, 0) AS delivered_orders,
+       rev.avg_food_rating
+FROM blr_rest b
+LEFT JOIN (
+    SELECT o.restaurant_id,
+           max(o.placed_at) AS last_order_at,
+           count(*) FILTER (WHERE o.status = 'DELIVERED') AS delivered_orders
+    FROM orders o
+    JOIN blr_rest b2 ON b2.restaurant_id = o.restaurant_id
+    GROUP BY o.restaurant_id
+) ord ON ord.restaurant_id = b.restaurant_id
+LEFT JOIN (
+    SELECT v.restaurant_id,
+           round(avg(v.food_rating), 2) AS avg_food_rating
+    FROM reviews v
+    JOIN blr_rest b3 ON b3.restaurant_id = v.restaurant_id
+    GROUP BY v.restaurant_id
+) rev ON rev.restaurant_id = b.restaurant_id
 ORDER BY last_order_at DESC NULLS LAST;
 
 -- @R20
@@ -251,10 +280,12 @@ ORDER BY 1, 2;
 
 -- @R23
 -- Admin panel: "All orders", newest first, page 4,001 (25 rows per page)
+-- [REWRITTEN]: Keyset pagination seeking directly past the 100,000th order's placed_at timestamp
+-- (On seed_data: row 100,000 in placed_at DESC order is order_id 50001 at '2025-07-02 00:00:00+05:30')
 SELECT order_id, customer_id, restaurant_id, status, total_amount, placed_at
 FROM orders
+WHERE placed_at < TIMESTAMPTZ '2025-07-02 00:00:00+05:30'
 ORDER BY placed_at DESC
-OFFSET 100000
 LIMIT 25;
 
 -- @R24
