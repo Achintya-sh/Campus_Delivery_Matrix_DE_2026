@@ -55,8 +55,10 @@ psql -v ON_ERROR_STOP=1 -d campus_delivery_matrix -f sql/02_load_data.sql
 | **Total Seed Rows Loaded** | **781,194 rows** (`0` errors) | `150,000` orders · `375,000` order items · `137,378` payments · `50,000` menu items · `39,186` reviews ([docs/02_schema_design.md](docs/02_schema_design.md)) |
 | **Declarative Constraints** | **11 PKs · 15 FKs · 7 UNIQUE · 38 CHECKs** | Full order status/timestamp lifecycle & billing invariants ([sql/01_schema.sql](sql/01_schema.sql)) |
 | **Phase 3 Baseline Total (30 Queries)** | **9,044.222 ms** (average of 3 runs) | Read queries (`R01`–`R25`): `8,976.986 ms` · Write queries (`W01`–`W05`): `67.236 ms` ([docs/03_baseline_timings.md](docs/03_baseline_timings.md)) |
-| **Biggest Baseline Bottleneck** | **`R19`: 8,492.450 ms** (93.9% of total) | 3 correlated subqueries per Bengaluru restaurant (`750` unindexed table scans) |
-| **Correctness Bug Identified** | **`R13` (`NOT IN` with `NULL`s)** | Returns `0` rows instead of `82` active idle Bengaluru riders due to `NULL` `orders.partner_id` |
+| **Phase 4 Optimized Total (30 Queries)** | **205.608 ms** (**97.73% faster / 43.99×**) | Read queries (`R01`–`R25`): `152.991 ms` (`58.68×`) · Write queries (`W01`–`W05`): `52.617 ms` ([docs/04_optimization_report.md](docs/04_optimization_report.md)) |
+| **Biggest Baseline Bottleneck** | **`R19`: 8,492.450 ms → 26.455 ms** (**321.0×**) | Rewrote 3 correlated subqueries into pre-aggregated `LEFT JOIN`s + covering indexes |
+| **Deep Pagination Speedup** | **`R23`: 74.508 ms → 0.216 ms** (**344.9×**) | Replaced `OFFSET 100000` with keyset pagination on `idx_orders_placed_desc_covering` |
+| **Correctness Bug Identified & Fixed** | **`R13` (`NOT IN` → `NOT EXISTS`)** | Fixed `NULL` `orders.partner_id` bug (`0` rows → `129` active idle Bengaluru riders in `0.651 ms`) |
 
 ### Evaluation Matrix · 100 Marks
 | Category | Evaluation Criteria | Marks |
